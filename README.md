@@ -1,4 +1,4 @@
-Final Project of Data Science
+**Final Project of Data Science**
 Interactive Macro & Portfolio Analytics Dashboard (Python + Dash + Plotly)
 
 This project is my final submission for the Applied Data Science course.
