@@ -8,7 +8,11 @@ import numpy as np
 import customfunction as cf
 from MacroFunction import GrabRate, GrabMacro
 
-SPX_LOCAL_PATH = "D:/Github/MacroDash/SPX_return.csv"
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SPX_LOCAL_PATH = os.path.join(BASE_DIR, "SPX_return.csv")
+
 
 df=pd.read_excel('ratesdata.xlsx',index_col=0)
 rates = pd.DataFrame()
@@ -632,4 +636,5 @@ def init_spx_returns(n):
     return df_spx.to_dict("records")
 
 if __name__=='__main__':
+
     app.run_server(debug=True)
