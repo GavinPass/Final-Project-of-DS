@@ -13,7 +13,7 @@ The project implements a fully interactive web-based analytics dashboard that co
 
 The dashboard is built using **Plotly Dash**, with data processing in pandas, modeling in statsmodels, and modular helper functions defined in `customfunction.py` and `MacroFunction.py`.
 
-The dashboard has been deployed to Heroku by clicking this website: 
+The dashboard has been deployed to Heroku by clicking this website:  https://final-ds-project-7ca6ab7e3438.herokuapp.com/ 
 
 ## 📁 Project Structure
 
