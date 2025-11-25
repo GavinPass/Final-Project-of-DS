@@ -242,6 +242,29 @@ app.layout = html.Div([
     ])
 ])
 
+from flask import send_file
+import io
+import xlsxwriter
+
+@app.server.route('/download_excel/rate/')
+def download_rate():
+    output = io.BytesIO()
+    
+    # 写入 Excel
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        rates.to_excel(writer, index=True, sheet_name='RatesData')
+
+    output.seek(0)
+    
+    # 返回文件给浏览器
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='rates_data.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+
 # ======== 回调：Macro 两张图 ========
 @app.callback(
     [Output('ratechart','figure'),
@@ -667,4 +690,5 @@ def init_spx_returns(n):
 if __name__=='__main__':
 
     app.run_server(debug=True)
+
 
