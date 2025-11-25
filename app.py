@@ -466,21 +466,50 @@ def render_arima(rets_w_data, w_w_data, d0, d1):
     if port.empty:
         raise exceptions.PreventUpdate
 
-    # 2) 构造风险代理（20D年化波动率）
-    risk = cf.risk_proxy_from_returns(port, window=20, annualize=True)
+    # 2) 构造风险代理（20D年化波动率）+ 对齐日期
+    risk_raw = cf.risk_proxy_from_returns(port, window=20, annualize=True)
+
+    risk = pd.Series(
+        risk_raw.values,
+        index=port.index[-len(risk_raw):],   # 用最后 N 天的日期
+        name="Risk"
+    )
 
     # 3) ARIMA 预测（默认 5 日）
     yhat, ci, info = cf.arima_forecast(risk, horizon=5, max_p=3, max_q=3, d=None)
 
+    # === 关键：给预测结果改成“未来日期”的 index ===
+    last_dt = risk.index[-1]
+    future_idx = pd.date_range(
+        start=last_dt + pd.Timedelta(days=1),
+        periods=len(yhat),
+        freq="B"           # 或者 "D"，看你希望按交易日还是自然日
+    )
+
+    # 把 yhat 和 ci 都绑到 future_idx 上
+    yhat = pd.Series(yhat.values, index=future_idx, name="Forecast")
+    ci = pd.DataFrame(ci.values, index=future_idx, columns=ci.columns)
+
     # 4) 画图：历史风险 + 未来预测
-    hist = risk.rename("Risk")
-    fut  = yhat.rename("Forecast")
-    fig = px.line(hist.to_frame(), labels={"index":"Date","value":"Risk (ann.)"})
-    fig.add_scatter(x=fut.index, y=fut.values, mode="lines+markers", name="Forecast")
-    # 置信区间带（两条线）
-    fig.add_scatter(x=ci.index, y=ci.iloc[:,0], mode="lines", line=dict(dash="dot"), name="Lower 95%")
-    fig.add_scatter(x=ci.index, y=ci.iloc[:,1], mode="lines", line=dict(dash="dot"), name="Upper 95%")
+    hist = risk  # 已经有名字 "Risk"
+    fig = px.line(hist.to_frame(), labels={"index": "Date", "value": "Risk (ann.)"})
+
+    fig.add_scatter(
+        x=yhat.index, y=yhat.values,
+        mode="lines+markers", name="Forecast"
+    )
+
+    fig.add_scatter(
+        x=ci.index, y=ci.iloc[:, 0],
+        mode="lines", line=dict(dash="dot"), name="Lower 95%"
+    )
+    fig.add_scatter(
+        x=ci.index, y=ci.iloc[:, 1],
+        mode="lines", line=dict(dash="dot"), name="Upper 95%"
+    )
+
     fig.update_layout(title=f"ARIMA Forecast of Risk (order={info['order']}, AIC={info['aic']:.1f})")
+    fig.update_xaxes(title="Date", type="date")
 
     summary = (
         f"Target: 20D annualized volatility | "
@@ -638,3 +667,4 @@ def init_spx_returns(n):
 if __name__=='__main__':
 
     app.run_server(debug=True)
+
