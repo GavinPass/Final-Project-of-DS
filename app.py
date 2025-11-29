@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SPX_LOCAL_PATH = os.path.join(BASE_DIR, "SPX_return.csv")
 
 
-df=pd.read_excel('ratesdata.xlsx',index_col=0)
+df=pd.read_excel('ratesdata.csv',index_col=0)
 rates = pd.DataFrame()
 # for i in range(3):
 #     rates=pd.concat([rates,GrabRate(i+2020)])
@@ -260,7 +260,7 @@ def download_rate():
     return send_file(
         output,
         as_attachment=True,
-        download_name='rates_data.xlsx',
+        download_name='rates_data.csv',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
@@ -690,5 +690,6 @@ def init_spx_returns(n):
 if __name__=='__main__':
 
     app.run_server(debug=True)
+
 
 
