@@ -12,7 +12,7 @@ def GrabRate(Year):
     req = requests.get("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView",params={'type':'daily_treasury_yield_curve','field_tdr_date_value':str(Year)})
     bs = BeautifulSoup(req.content,'html.parser')
 
-    result=bs.find('table',class_='usa-table views-table views-view-table cols-26')
+    result=bs.find('table',class_='usa-table views-table views-view-table cols-26 sticky-enabled')
     data=result.find_all('tr')
 
     rates = pd.DataFrame()
@@ -58,4 +58,5 @@ def GrabMacro(Name):
         cleaned_string=''.join(filter(str.isdigit,a))
         float_value=float(cleaned_string)/10000
         data.append(float_value)
+
     return count,data
